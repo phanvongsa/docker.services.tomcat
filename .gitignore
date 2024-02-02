@@ -1,0 +1,3 @@
+.env
+wars/*
+conf/tomcat-users.xml
