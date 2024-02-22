@@ -7,6 +7,14 @@ services:
       context: .
     ports:
       - ${HTTP_PORT}:8080
+    #command: bash -c "cp /usr/local/tomcat/wars/*.war /usr/local/tomcat/webapps"
     volumes:
-       - ${VOLS_WARS}:/usr/local/tomcat/wars/
-       - ${VOLS_LOGS}:/usr/local/tomcat/logs/
+      - ${VOLS_WARS}:/usr/local/tomcat/wars/
+      - ${VOLS_LOGS}:/usr/local/tomcat/logs/
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    name: local-network
+    external: true      
