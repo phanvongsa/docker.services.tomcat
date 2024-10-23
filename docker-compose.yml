@@ -5,12 +5,20 @@ services:
     container_name: tomcat
     build:
       context: .
+      dockerfile: Dockerfile
+      args:
+        SFTP_USERNAME: ${SFTP_USERNAME}
+        SFTP_PASSWORD: ${SFTP_PASSWORD}        
+    env_file:
+      - .env
     ports:
       - ${HTTP_PORT}:8080
+      - ${SSH_PORT}:22
     #command: bash -c "cp /usr/local/tomcat/wars/*.war /usr/local/tomcat/webapps"
     volumes:
       - ${VOLS_WARS}:/usr/local/tomcat/wars/
       - ${VOLS_LOGS}:/usr/local/tomcat/logs/
+      - ${VOLS_DATA}:/mnt/data
     networks:
       - localnet
 
