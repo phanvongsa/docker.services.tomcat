@@ -7,8 +7,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        SFTP_USERNAME: ${SFTP_USERNAME}
-        SFTP_PASSWORD: ${SFTP_PASSWORD}        
+        SERVER_UN: ${SERVER_UN}
+        SERVER_PW: ${SERVER_PW}
+        TOMCAT_UN: ${TOMCAT_UN}
+        TOMCAT_PW: ${TOMCAT_PW}
     env_file:
       - .env
     ports:
