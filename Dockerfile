@@ -26,7 +26,11 @@ RUN useradd -ms /bin/bash $SERVER_UN && \
 
 # Create Tomcat user and group
 RUN groupadd -r tomcat && \
-    useradd -r -s /bin/bash -g tomcat -d $TOMCAT_HOME $TOMCAT_UN
+    useradd -r -s /bin/bash -g tomcat -d $TOMCAT_HOME -p $(openssl passwd -6 "$TOMCAT_PW") $TOMCAT_UN
+
+    # tomcat_pw=$(openssl passwd -6 "$TOMCAT_PW")
+    # # Create the user with the hashed password
+    # sudo useradd -m -p "$tomcat_pw" valro
 
 # Download and install Apache Tomcat
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-8/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz && \
