@@ -1,3 +1,50 @@
+### Tomcat Version 	      JVM Version 	              JVM Vendor 	OS Name 	OS Version 	                        OS Architecture 	Hostname 	IP Address
+### Apache Tomcat/8.5.41 	1.8.0_212-b04 	            IcedTea 	  Linux 	  5.15.153.1-microsoft-standard-WSL2 	amd64 	          02d5394a556b 	10.0.1.8
+### Apache Tomcat/8.5.41 	17.0.13+11-Debian-2deb12u1 	Debian 	    Linux 	  5.15.153.1-microsoft-standard-WSL2 	amd64 	          e5f553132690 	10.0.1.9
+FROM tomcat:8.5-alpine
+
+ARG SERVER_UN=server_user__
+ARG SERVER_PW=server_password__
+ARG TOMCAT_UN=tomcat_user__
+ARG TOMCAT_PW=tomcat_password__
+
+# Set environment variables
+ENV TOMCAT_VERSION=8.5.41 \
+    TOMCAT_HOME=/usr/local/tomcat
+
+# Install OpenSSH and sudo
+RUN apk update && \
+    apk add --no-cache openssh sudo
+
+# Create users "valro" and "tomcat" with passwords
+RUN adduser -D -s /bin/sh $SERVER_UN && \
+    echo "$SERVER_UN:$SERVER_PW" | chpasswd && \
+    adduser -D -s /bin/sh $TOMCAT_UN && \
+    echo "$TOMCAT_UN:$TOMCAT_PW" | chpasswd
+
+# Allow valro to use 'su' to switch to tomcat without a password
+RUN echo "$SERVER_UN ALL=(ALL) /bin/su - $TOMCAT_UN" >> /etc/sudoers
+
+# Generate SSH host keys
+RUN ssh-keygen -A
+
+# Configure SSH for password authentication
+RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+
+RUN mkdir /home/$SERVER_UN/wars
+RUN chown -R $TOMCAT_UN:$TOMCAT_UN $TOMCAT_HOME
+RUN chown -R $SERVER_UN:$SERVER_UN /home/$SERVER_UN
+# Expose Tomcat and SSH ports
+EXPOSE 8080 22
+
+# Start SSH and Tomcat when container runs
+CMD /usr/sbin/sshd && catalina.sh run
+
+#COPY start__.sh /usr/local/bin/start.sh
+#CMD ["/usr/local/bin/start.sh"]
+#CMD ["catalina.sh", "run"]
+############ ^^^ WORKING.ALPINE ^^^ ############
+
 # # Use Debian as the base image
 # FROM debian:latest
 
@@ -74,53 +121,6 @@
 # USER $TOMCAT_UN
 # CMD ["/start.sh"]
 ############ ^^^ WORKING ^^^ ############
-
-### Tomcat Version 	      JVM Version 	              JVM Vendor 	OS Name 	OS Version 	                        OS Architecture 	Hostname 	IP Address
-### Apache Tomcat/8.5.41 	1.8.0_212-b04 	            IcedTea 	  Linux 	  5.15.153.1-microsoft-standard-WSL2 	amd64 	          02d5394a556b 	10.0.1.8
-### Apache Tomcat/8.5.41 	17.0.13+11-Debian-2deb12u1 	Debian 	    Linux 	  5.15.153.1-microsoft-standard-WSL2 	amd64 	          e5f553132690 	10.0.1.9
-FROM tomcat:8.5-alpine
-
-ARG SERVER_UN=server_user__
-ARG SERVER_PW=server_password__
-ARG TOMCAT_UN=tomcat_user__
-ARG TOMCAT_PW=tomcat_password__
-
-# Set environment variables
-ENV TOMCAT_VERSION=8.5.41 \
-    TOMCAT_HOME=/usr/local/tomcat
-
-# Install OpenSSH and sudo
-RUN apk update && \
-    apk add --no-cache openssh sudo
-
-# Create users "valro" and "tomcat" with passwords
-RUN adduser -D -s /bin/sh $SERVER_UN && \
-    echo "$SERVER_UN:$SERVER_PW" | chpasswd && \
-    adduser -D -s /bin/sh $TOMCAT_UN && \
-    echo "$TOMCAT_UN:$TOMCAT_PW" | chpasswd
-
-# Allow valro to use 'su' to switch to tomcat without a password
-RUN echo "$SERVER_UN ALL=(ALL) /bin/su - $TOMCAT_UN" >> /etc/sudoers
-
-# Generate SSH host keys
-RUN ssh-keygen -A
-
-# Configure SSH for password authentication
-RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
-
-RUN mkdir /home/$SERVER_UN/wars
-RUN chown -R $TOMCAT_UN:$TOMCAT_UN $TOMCAT_HOME
-RUN chown -R $SERVER_UN:$SERVER_UN /home/$SERVER_UN
-# Expose Tomcat and SSH ports
-EXPOSE 8080 22
-
-# Start SSH and Tomcat when container runs
-CMD /usr/sbin/sshd && catalina.sh run
-
-#COPY start__.sh /usr/local/bin/start.sh
-#CMD ["/usr/local/bin/start.sh"]
-#CMD ["catalina.sh", "run"]
-############ ^^^ WORKING.ALPINE ^^^ ############
 # FROM tomcat:8.5.100-jdk11-temurin-jammy
 
 # ARG SERVER_UN=server_user__
