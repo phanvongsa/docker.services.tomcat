@@ -25,14 +25,29 @@ RUN adduser -D -s /bin/sh $SERVER_UN && \
 # Allow valro to use 'su' to switch to tomcat without a password
 RUN echo "$SERVER_UN ALL=(ALL) /bin/su - $TOMCAT_UN" >> /etc/sudoers
 
+RUN echo '<?xml version="1.0" encoding="UTF-8"?> \
+    <tomcat-users> \
+    <role rolename="manager-gui"/> \
+    <role rolename="admin-gui"/> \
+    <user username="'$TOMCAT_UN'" password="'$TOMCAT_PW'" roles="manager-gui,admin-gui"/> \
+    </tomcat-users>' > $TOMCAT_HOME/conf/tomcat-users.xml
+
+## allow acccess via localhost + ips
+COPY ./conf/manager/META-INF/context.xml /usr/local/tomcat/webapps/manager/META-INF/context.xml
+
+
 # Generate SSH host keys
 RUN ssh-keygen -A
 
 # Configure SSH for password authentication
 RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 
+RUN mkdir /home/$TOMCAT_UN/wars
+RUN mkdir /home/$TOMCAT_UN/wars.archive
+
 RUN mkdir /home/$SERVER_UN/wars
 RUN chown -R $TOMCAT_UN:$TOMCAT_UN $TOMCAT_HOME
+RUN chown -R $TOMCAT_UN:$TOMCAT_UN /home/$TOMCAT_UN
 RUN chown -R $SERVER_UN:$SERVER_UN /home/$SERVER_UN
 # Expose Tomcat and SSH ports
 EXPOSE 8080 22
