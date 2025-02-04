@@ -1,5 +1,3 @@
-version: '2'
-
 services:
   tomcat:
     container_name: tomcat
@@ -21,9 +19,11 @@ services:
       - ${VOLS_WARS}:/usr/local/tomcat/wars/
       - ${VOLS_LOGS}:/usr/local/tomcat/logs/
       - ${VOLS_DATA}:/mnt/data
+    extra_hosts:    
+      - "srv-bx-val-d.lands.nsw:10.114.172.77"
+      - "cls-sw-proxy.lands.nsw:10.114.16.66"
     networks:
       - localnet
-
 networks:
   localnet:
     name: local-network
